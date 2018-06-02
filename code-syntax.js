@@ -18,21 +18,33 @@ const { SelectControl, CodeEditor } = wp.components;
 import './editor.scss';
 import './style.scss';
 
-const langs = {
-	bash:       'Bash (shell)',
-	clike:      'C-like',
-	css:        'CSS',
-	git:        'Git',
-	go:         'Go (golang)',
-	markup:     'HTML/Markup',
-	javascript: 'JavaScript',
-	json:       'JSON',
-	markdown:   'Markdown',
-	php:        'PHP',
-	python:     'Python',
-	jsx:        'React JSX',
-	sql:        'SQL',
-};
+const Langs = {
+	list: {
+		bash: 'Bash (shell)',
+		clike: 'C-like',
+		css: 'CSS',
+		git: 'Git',
+		go: 'Go (golang)',
+		markup: { name: 'HTML/Markup', mode: 'htmlmixed' },
+		javascript: 'JavaScript',
+		json: 'JSON',
+		markdown: 'Markdown',
+		php: 'PHP',
+		python: 'Python',
+		jsx: 'React JSX',
+		sql: 'SQL',
+	},
+
+	getName (code) {
+		let language = this.list[code];
+		return typeof language === 'string' ? language : language.name;
+	},
+
+	getEditorMode (code) {
+		let language = this.list[code];
+		return typeof language === 'string' ? code : language.mode;
+	},
+}
 
 const addSyntaxToCodeBlock = settings => {
 	if ( settings.name !== "core/code" ) {
@@ -48,7 +60,8 @@ const addSyntaxToCodeBlock = settings => {
 				type: 'string',
 				selector: 'code',
 				source: 'attribute',
-				attribute: 'lang'
+				attribute: 'lang',
+				default: 'markup'
 			},
 		},
 
@@ -57,13 +70,13 @@ const addSyntaxToCodeBlock = settings => {
 			const editorSettings = () => {
 				let settings = { ...window._wpGutenbergCodeEditorSettings };
 				settings.codemirror = { ...settings.codemirror };
-				settings.codemirror.mode = attributes.language;
+				settings.codemirror.mode = Langs.getEditorMode(attributes.language);
 				return settings;
 			};
 
 			const updateLanguage = language => {
 				setAttributes({ language });
-				attributes.editorInstance.setOption('mode', language);
+				attributes.editorInstance.setOption('mode', Langs.getEditorMode(language));
 			};
 			
 			return [
@@ -72,11 +85,10 @@ const addSyntaxToCodeBlock = settings => {
 						<SelectControl
 							label="Language"
 							value={ attributes.language }
-							options={
-								[ { label: __( 'Select code language' ), value: '' } ].concat (
-								Object.keys( langs ).map( ( lang ) => (
-									{ label: langs[lang], value: lang }
-								) ) )
+							options={ 
+								Object.keys(Langs.list).map( lang => (
+									{ label: Langs.getName(lang), value: lang }
+								) )
 							}
 							onChange={ updateLanguage }
 						/>
@@ -91,7 +103,7 @@ const addSyntaxToCodeBlock = settings => {
 						settings={ editorSettings() }
 						editorRef={ ref => attributes.editorInstance = ref }
 					/>
-					<div class="language-selected">{ langs[ attributes.language ] }</div>
+					<div class="language-selected">{ Langs.getName(attributes.language) }</div>
 				</div>
 			];
 		},
