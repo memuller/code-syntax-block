@@ -303,20 +303,31 @@ var _wp$components = wp.components,
 
 
 
-var langs = {
-	bash: 'Bash (shell)',
-	clike: 'C-like',
-	css: 'CSS',
-	git: 'Git',
-	go: 'Go (golang)',
-	markup: 'HTML/Markup',
-	javascript: 'JavaScript',
-	json: 'JSON',
-	markdown: 'Markdown',
-	php: 'PHP',
-	python: 'Python',
-	jsx: 'React JSX',
-	sql: 'SQL'
+var Langs = {
+	list: {
+		bash: 'Bash (shell)',
+		clike: 'C-like',
+		css: 'CSS',
+		git: 'Git',
+		go: 'Go (golang)',
+		markup: { name: 'HTML/Markup', mode: 'htmlmixed' },
+		javascript: 'JavaScript',
+		json: 'JSON',
+		markdown: 'Markdown',
+		php: 'PHP',
+		python: 'Python',
+		jsx: 'React JSX',
+		sql: 'SQL'
+	},
+
+	getName: function getName(code) {
+		var language = this.list[code];
+		return typeof language === 'string' ? language : language.name;
+	},
+	getEditorMode: function getEditorMode(code) {
+		var language = this.list[code];
+		return typeof language === 'string' ? code : language.mode;
+	}
 };
 
 var addSyntaxToCodeBlock = function addSyntaxToCodeBlock(settings) {
@@ -331,7 +342,8 @@ var addSyntaxToCodeBlock = function addSyntaxToCodeBlock(settings) {
 				type: 'string',
 				selector: 'code',
 				source: 'attribute',
-				attribute: 'lang'
+				attribute: 'lang',
+				default: 'markup'
 			}
 		}),
 
@@ -345,13 +357,13 @@ var addSyntaxToCodeBlock = function addSyntaxToCodeBlock(settings) {
 			var editorSettings = function editorSettings() {
 				var settings = __WEBPACK_IMPORTED_MODULE_1_babel_runtime_helpers_extends___default()({}, window._wpGutenbergCodeEditorSettings);
 				settings.codemirror = __WEBPACK_IMPORTED_MODULE_1_babel_runtime_helpers_extends___default()({}, settings.codemirror);
-				settings.codemirror.mode = attributes.language;
+				settings.codemirror.mode = Langs.getEditorMode(attributes.language);
 				return settings;
 			};
 
 			var updateLanguage = function updateLanguage(language) {
 				setAttributes({ language: language });
-				attributes.editorInstance.setOption('mode', language);
+				attributes.editorInstance.setOption('mode', Langs.getEditorMode(language));
 			};
 
 			return [isSelected && React.createElement(
@@ -360,9 +372,9 @@ var addSyntaxToCodeBlock = function addSyntaxToCodeBlock(settings) {
 				React.createElement(SelectControl, {
 					label: 'Language',
 					value: attributes.language,
-					options: [{ label: __('Select code language'), value: '' }].concat(__WEBPACK_IMPORTED_MODULE_0_babel_runtime_core_js_object_keys___default()(langs).map(function (lang) {
-						return { label: langs[lang], value: lang };
-					})),
+					options: __WEBPACK_IMPORTED_MODULE_0_babel_runtime_core_js_object_keys___default()(Langs.list).map(function (lang) {
+						return { label: Langs.getName(lang), value: lang };
+					}),
 					onChange: updateLanguage
 				})
 			), React.createElement(
@@ -383,7 +395,7 @@ var addSyntaxToCodeBlock = function addSyntaxToCodeBlock(settings) {
 				React.createElement(
 					'div',
 					{ 'class': 'language-selected' },
-					langs[attributes.language]
+					Langs.getName(attributes.language)
 				)
 			)];
 		},
