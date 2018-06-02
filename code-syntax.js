@@ -48,7 +48,8 @@ const addSyntaxToCodeBlock = settings => {
 				type: 'string',
 				selector: 'code',
 				source: 'attribute',
-				attribute: 'lang'
+				attribute: 'lang',
+				default: 'markup'
 			},
 		},
 
